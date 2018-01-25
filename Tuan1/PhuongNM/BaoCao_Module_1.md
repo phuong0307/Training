@@ -183,7 +183,7 @@ Gói tin ICMP gồm 2 phần:
 * data
 
 ## Header
-![](https://i.imgur.com/oxuJ11f.png)
+<blockquote class="imgur-embed-pub" lang="en" data-id="a/RRVBE"><a href="//imgur.com/RRVBE"></a></blockquote><script async src="//s.imgur.com/min/embed.js" charset="utf-8"></script>
 
 32 bit đầu tiên (4 byte đầu) của một gói tin ICMP là giống nhau cho mỗi loại thông điệp, nội dung các byte 
 còn lại sẽ lệ thuộc vào trường type và trường code:
