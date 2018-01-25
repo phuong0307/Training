@@ -143,7 +143,7 @@ Gói tin TCP gồm 2 phần:
 * data
 
 ## Header
-![](https://lh3.googleusercontent.com/C4OlVwESHYH-1AZwpQfzBZQuUHTsiDtzmPFkiMFY2RKVtHPYC6UfD5itVrLsiVT_7fVIkYaUBWSJL2o57FLq=w1366-h658-rw)
+![](https://i.imgur.com/EbHlstL.png)
 
 Header gồm 11 trường, trong đó có 10 trường đầu là bắt buộc.
 
@@ -166,7 +166,7 @@ Giá trị của trường này là thông tin dành cho các tầng trên (tron
 # Cấu trúc gói tin UDP
 
 ## Header
-![](https://lh5.googleusercontent.com/EyIlr68HGdf8Cb4O85fvvByY1-pO6sS405vz1KWSV4k2GCFTSnqHshTpT6tdhaOjjyj0yb9VD7iTd-_6GrP3=w1366-h658-rw)
+![](https://i.imgur.com/TsdSIAT.png)
 Chứa thông tin về địa chỉ cổng nguồn, cổng đích, độ dài của gói và checksum.
 
 Header của gói tin UDP chỉ chứa 4 trường dữ liệu, trong đó có 2 trường là tùy chọn (source port và checksum)
@@ -183,7 +183,7 @@ Gói tin ICMP gồm 2 phần:
 * data
 
 ## Header
-![](https://lh5.googleusercontent.com/E4DNF7gVVi7LFJQiVTDGB0vCRtGut3He1Mf8Y_8Zm0ZcpNsQtTpCsfzbNzCtfXJ6vF43xjpgB3qx8IKSa7XP=w1366-h658-rw)
+![](https://i.imgur.com/oxuJ11f.png)
 
 32 bit đầu tiên (4 byte đầu) của một gói tin ICMP là giống nhau cho mỗi loại thông điệp, nội dung các byte 
 còn lại sẽ lệ thuộc vào trường type và trường code:
@@ -203,7 +203,7 @@ Gói tin IP được chia thành 2 phần:
 * data
 
 ## Header
-![](https://lh5.googleusercontent.com/DdGlAjTKeXwFF3uhtVsE7DvNRV6B_6x-URk6yitWSqdIyQ53zORCI0GNICS7S0ah6SDqdteOdMouXQOCfuE2=w1366-h663)
+![](https://i.imgur.com/vSal7oW.png)
 
 * Vesion : xác định phiên bản của IP được sử dụng để tạo ra gói tin. Mục đích của nó nhằm đảm bảo khả năng tương thích giữa các thiết bị có thể chạy trên các phiên bản khác nhau của IP.
 * IHL (Internet Header Length): xác định độ dài phần header 
