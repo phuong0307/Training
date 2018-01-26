@@ -153,7 +153,7 @@ Header gồm 11 trường, trong đó có 10 trường đầu là bắt buộc.
 * **Acknowledgement number**: Nếu cờ ACK bật thì giá trị của trường chính là số thứ tự gói tin tiếp theo mà bên nhận cần.
 * **Data offset**: Trường có độ dài 4 bít quy định độ dài của phần header (tính theo đơn vị từ 32 bít). Phần header có độ dài tối thiểu là 5 từ (160 bit) và tối đa là 15 từ (480 bít).
 * **Reserved**: dành cho tương lai và có giá trị là 0.
-* **Flags** (hay Control bits): bid điều khiển
+* **Flags** (hay Control bits): bit điều khiển
 * **Checksum**:
 16 bít kiểm tra cho cả phần header và dữ liệu. 
 Phương pháp sử dụng được mô tả trong RFC 793: 16 bít của trường kiểm tra là bổ sung của tổng tất cả các từ 16 bít trong gói tin. Trong trường hợp số octet (khối 8 bít) của header và dữ liệu là lẻ thì octet cuối được bổ sung với các bít 0. Các bít này không được truyền. Khi tính tổng, giá trị của trường kiểm tra được thay thế bằng 0.
