@@ -1,4 +1,4 @@
-# Mô hình OSI 
+# 1. Mô hình OSI 
 
 Mô hình OSI (Open Systems Interconnection Reference Model) là một thiết kế dựa vào nguyên lý tầng cấp, lý giải một cách trừu tượng kỹ thuật kết nối truyền thông giữa các máy vi tính và thiết kế giao thức mạng giữa chúng.
 
@@ -26,9 +26,9 @@ Tầng Liên kết dữ liệu chính là nơi các *thiết bị chuyển mạc
 
 Tầng này được chia thành 2 tầng con:
 
-- Logical Link Control - LLC: điều khiển liên kết logic
+- Logical Link Control - LLC (điều khiển liên kết logic): dùng để liên kết dữ liệu với tầng trên chỉ ra giao thức hoạt động ở tầng mạng (IP, IPX, Apple talk) đã đòng gói ra packet trong phần data của Frame.
 
-- Media Access Control - MAC: điều khiển truy nhập môi trường
+- Media Access Control - MAC (điều khiển truy nhập môi trường): tham gia trực tiếp việc đóng gói Packet thành Frame thêm vào địa chỉ Mac nguồn và Mac đích trong Frame, thêm vào các nhóm bít bắt đầu và mã kết thúc của một Frame và điều khiển Frame truy cập đường truyền.
 
 ### Tầng 3: Tầng Mạng (Network Layer)
 Tầng Mạng xử lý việc truyền thông dữ liệu trên cả đoạn đường từ nguồn đến đích, và đồng thời truyền bất cứ tin tức gì, từ bất cứ nguồn nào tới bất cứ đích nào mà chúng ta cần. 
@@ -88,7 +88,7 @@ Phiên | PPTP, NetBIOS,...
 Trình diễn | TLS, SSL,...
 Ứng dụng | HTTP, FTP, SNMP, DNS, Telnet,...
 
-# Bộ giao thức TCP/IP
+# 2. Bộ giao thức TCP/IP
 TCP/IP *(Transmission Control Protocol / Internet Protocol)* là một tập hợp các giao thức (protocol) điều khiển truyền thông giữa tất cả các máy tính trên Internet. 
 
 Cụ thể hơn, TCP/IP chỉ rõ cách thức đóng gói thông tin (hay còn gọi là gói tin ), được gửi và nhận bởi các máy tính có kết nối với nhau. Nó được phát triển vào năm 1978 bởi Bob Kahn và Vint Cerf.
@@ -136,14 +136,51 @@ Nó bao gồm các giao thức cấp cao được sử dụng để cung cấp c
 |Giao vận|TCP, UDP
 |Ứng dụng|HTTP, FTP, SMTP, DNS, RIP, SMNP
 
-# Cấu trúc gói tin TCP
+# 2.1. Cấu trúc gói tin TCP
+
+Các kết nối TCP có ba pha:
+
+1. Thiết lập kết nối
+2. Truyền dữ liệu
+3. Kết thúc kết nối
+
+### Thiết lập kết nối
+TCP sử dụng một quy trình bắt tay 3 bước (3-way handshake).
+
+Trước khi client thử kết nối với một server, server phải đăng ký một cổng và mở cổng đó cho các kết nối: đây được gọi là mở bị động.  
+
+Một khi mở bị động đã được thiết lập thì một client có thể bắt đầu mở chủ động. Để thiết lập một kết nối, quy trình bắt tay 3 bước xảy ra như sau:
+
+1. Client yêu cầu mở cổng dịch vụ bằng cách gửi gói tin SYN (gói tin TCP) tới server, trong gói tin này, tham số sequence number được gán cho một giá trị ngẫu nhiên X.
+
+2. Server hồi đáp bằng cách gửi lại phía client bản tin SYN-ACK, trong gói tin này, tham số acknowledgment number được gán giá trị bằng X + 1, tham số sequence number được gán ngẫu nhiên một giá trị Y
+
+3. Để hoàn tất quá trình bắt tay ba bước, client tiếp tục gửi tới server bản tin ACK, trong bản tin này, tham số sequence number được gán cho giá trị bằng X + 1 còn tham số acknowledgment number được gán giá trị bằng Y + 1
+
+![](https://sites.google.com/a/javainterview.net/question/_/rsrc/1425457816649/misc/tcp-ip/3-way-handshake-Intro-to-transport-layer-The-internetworking-Part2.gif)
+
+Quy trình này có thể bị lợi dụng để thực hiện tấn công SYN attack. Hacker sẽ gửi đến hệ thống đích một loạt SYN packets với địa chỉ IP nguồn ảo. Hệ thống đích khi nhận được các bad SYN packets này sẽ gởi trở lại SYN/ACK packet đến các địa chỉ không có thực này vào chờ nhận được ACK messages từ các địa chỉ IP đó. Vì đây là các địa chỉ IP không có thực, hệ thống đích sẽ chờ đợi vô ích và còn nối đuôi các “request” chờ đợi này nào hàng đợi, gây lãng phí một lượng đáng kể bộ nhớ trên máy chủ mà đúng ra là phải dùng vào việc khác thay cho phải chờ đợi ACK messages.
+
+### Truyền dữ liệu
+Trên lý thuyết, mỗi byte gửi đi đều có một số thứ tự và khi nhận được thì máy tính nhận gửi lại tin báo nhận (ACK). 
+
+Trong thực tế thì chỉ có byte dữ liệu đầu tiên được gán số thứ tự trong trường số thứ tự của gói tin và bên nhận sẽ gửi tin báo nhận bằng cách gửi số thứ tự của byte đang chờ.
+
+VD. Máy tính A gửi 4 byte với số thứ tự ban đầu là 100 (theo lý thuyết thì 4 byte sẽ có thứ tự là 100, 101, 102, 103) thì bên nhận sẽ gửi tin báo nhận có nội dung là 104 vì đó là thứ tự của byte tiếp theo nó cần. Bằng cách gửi tin báo nhận là 104, bên nhận đã ngầm thông báo rằng nó đã nhận được các byte 100, 101, 102 và 103. Trong trường hợp 2 byte cuối bị lỗi thì bên nhận sẽ gửi tin báo nhận với nội dung là 102 vì 2 byte 100 và 101 đã được nhận thành công.
+
+### Kết thúc kết nối
+Hai bên sử dụng quá trình bắt tay 4 bước và chiều của kết nối kết thúc độc lập với nhau. Khi một bên muốn kết thúc, nó gửi đi một gói tin FIN và bên kia gửi lại tin báo nhận ACK. Vì vậy, một quá trình kết thúc tiêu biểu sẽ có 2 cặp gói tin trao đổi.
+
+Một kết nối có thể tồn tại ở dạng "nửa mở": một bên đã kết thúc gửi dữ liệu nên chỉ nhận thông tin, bên kia vẫn tiếp tục gửi.
+
+***
 Gói tin TCP gồm 2 phần:
 
 * header
 * data
 
 ## Header
-![](https://i.imgur.com/EbHlstL.png)
+![](https://i.imgur.com/Sf1ZZ3A.png)
 
 Header gồm 11 trường, trong đó có 10 trường đầu là bắt buộc.
 
@@ -153,18 +190,35 @@ Header gồm 11 trường, trong đó có 10 trường đầu là bắt buộc.
 * **Acknowledgement number**: Nếu cờ ACK bật thì giá trị của trường chính là số thứ tự gói tin tiếp theo mà bên nhận cần.
 * **Data offset**: Trường có độ dài 4 bít quy định độ dài của phần header (tính theo đơn vị từ 32 bít). Phần header có độ dài tối thiểu là 5 từ (160 bit) và tối đa là 15 từ (480 bít).
 * **Reserved**: dành cho tương lai và có giá trị là 0.
-* **Flags** (hay Control bits): bit điều khiển
-* **Checksum**:
-16 bít kiểm tra cho cả phần header và dữ liệu. 
-Phương pháp sử dụng được mô tả trong RFC 793: 16 bít của trường kiểm tra là bổ sung của tổng tất cả các từ 16 bít trong gói tin. Trong trường hợp số octet (khối 8 bít) của header và dữ liệu là lẻ thì octet cuối được bổ sung với các bít 0. Các bít này không được truyền. Khi tính tổng, giá trị của trường kiểm tra được thay thế bằng 0.
+* **Flags** (hay Control bits): bit điều khiển, gồm 6 cờ
+  * **URG**: Cờ cho trường Urgent pointer
+  * **ACK**: Cờ cho trường Acknowledgement
+  * **PSH**: Hàm Push
+  * **RST**: Thiết lập lại đường truyền
+  * **SYN**: Đồng bộ lại số thứ tự
+  * **FIN**: Không gửi thêm số liệu
+* **Checksum**: kiểm tra phần header và data
 * **Urgent pointer**: Nếu cờ URG bật thì giá trị trường này chính là số từ 16 bít mà số thứ tự gói tin (sequence number) cần dịch trái.
 * **Options**: Đây là trường tùy chọn. Nếu có thì độ dài là bội số của 32 bít.
 
 ## Data
 Giá trị của trường này là thông tin dành cho các tầng trên (trong mô hình 7 lớp OSI). Thông tin về giao thức của tầng trên không được chỉ rõ trong phần header mà phụ thuộc vào cổng được chọn.
 
-# Cấu trúc gói tin UDP
+# 2.2. Cấu trúc gói tin UDP
 
+UDP (User Datagram Protocol) là một trong những giao thức cốt lõi của giao thức TCP/IP. 
+
+Dùng UDP, chương trình trên mạng máy tính có thể gửi những dữ liệu ngắn được gọi là datagram tới máy khác. 
+
+UDP không cung cấp sự tin cậy và thứ tự truyền nhận mà TCP làm, các gói dữ liệu có thể đến không đúng thứ tự hoặc bị mất mà không có thông báo. 
+
+Tuy nhiên UDP nhanh và hiệu quả hơn đối với các mục tiêu như kích thước nhỏ và yêu cầu khắt khe về thời gian. 
+
+Do bản chất không trạng thái của nó nên nó hữu dụng đối với việc trả lời các truy vấn nhỏ với số lượng lớn người yêu cầu.
+
+UDP thường được sử dụng cho chương trình phát sóng trực tiếp và trò chơi trực tuyến.
+
+***
 ## Header
 ![](https://i.imgur.com/TsdSIAT.png)
 Chứa thông tin về địa chỉ cổng nguồn, cổng đích, độ dài của gói và checksum.
@@ -176,7 +230,14 @@ Header của gói tin UDP chỉ chứa 4 trường dữ liệu, trong đó có 2
 * Length: xác định chiều dài của toàn bộ gói tin
 * Checksum: kiểm tra lỗi của phần header và dữ liệu. 
 
-# Cấu trúc gói tin ICMP
+# 2.3. Cấu trúc gói tin ICMP
+
+ICMP (Internet Control Message Protocol) là một giao thức của bộ giao thức TCP/IP. Nó được các thiết bị mạng như router dùng để gửi đi các thông báo lỗi chỉ ra một dịch vụ có tồn tại hay không, hoặc một địa chỉ host hay router có tồn tại hay không.
+
+ICMP khác với các giao thức vận chuyển như TCP và UDP ở chỗ nó không thường được sử dụng để trao đổi dữ liệu giữa các hệ thống, cũng không thường xuyên được sử dụng bởi các ứng dụng mạng của người dùng cuối (với ngoại lệ của một số công cụ chẩn đoán như ping và traceroute).
+
+***
+
 Gói tin ICMP gồm 2 phần:
 
 * header
@@ -192,12 +253,19 @@ còn lại sẽ lệ thuộc vào trường type và trường code:
 * Code (8 bit):cung cấp thêm thông tin về kiểu thông điệp. 
 * Checksum (16 bit): ICMP sử dụng thuật checksum như IP, nhưng ICMP checksum chỉ tính đến thông điệp ICMP.
 
+Một số thông báo đáng chú ý:
+![](https://i.imgur.com/vUPRGlc.png)
 ## Data
 Thông thường, data là header của gói tin IP và là 64 bit đầu tiên của nó.
 
 # Cấu trúc gói tin IP
-Gói tin IP được chia thành 2 phần:
+Mục đích của giao thức IP (Internet Protocol) là kết nối các mạng con thành dạng Internet để truyền dữ liệu.
 
+Có lẽ các khía cạnh phức tạp nhất của IP là việc đánh địa chỉ và định tuyến. 
+
+Đánh địa chỉ là công việc cấp địa chỉ IP cho các máy đầu cuối, cùng với việc phân chia và lập nhóm các mạng con của các địa chỉ IP. Việc định tuyến IP được thực hiện bởi tất cả các máy chủ, nhưng đóng vai trò quan trọng nhất là các thiết bị định tuyến liên mạng. Các thiết bị đó thường sử dụng các giao thức cổng trong (interior gateway protocol, viết tắt là IGP) hoặc các giao thức cổng ngoài (external gateway protocol, viết tắt là EGP) để hỗ trợ việc đưa ra các quyết định chuyển tiếp các gói tin IP (IP datagram) qua các mạng kết nối với nhau bằng giao thức IP.
+***
+Gói tin IP được chia thành 2 phần:
 
 * header
 * data
@@ -210,7 +278,7 @@ Gói tin IP được chia thành 2 phần:
 * Type Of Service: mang thông tin để cung cấp chất lượng của các dịch vụ (QoS)
 * Total Length : tổng chiều dài của gói tin IP
 * Identification : định danh gói tin gốc trước khi nó bị phân mảnh
-* Flags : kiểm soát xem một gói tin bị phân mảnh (có 3 bit)
+* Flags: kiểm soát xem một gói tin bị phân mảnh (có 3 bit)
   * Bit 0: không dùng
   * Bit 1: cho biết gói có phân mảnh hay không
   * Bit 2: Nếu gói tin IP bị phân mảnh thì cho biết mảnh này có phải là mảnh cuối không
@@ -224,3 +292,11 @@ Gói tin IP được chia thành 2 phần:
 
 ## Data
 Nội dung của nó được xác định dựa trên Protocol ở header. 
+
+2.4. So sánh TCP và UDP
+
+TCP hoạt động theo hướng kết nối (connection-oriented). Trước khi truyền dữ liệu giữa 2 máy, nó thiết lập một kết nối giữa 2 máy theo phương thức “bắt tay 3 bước" (3-way handshake) bằng cách gửi gói tin ACK từ máy đích sang máy nhận, trong suốt quá trình truyền gói tin, máy gửi yêu cầu máy đích xác nhận đã nhận đủ các gói tin đã gửi, nếu có gói tin bị mất, máy đích sẽ yêu cầu máy gửi gửi lại, thường xuyên kiểm tra gói tin có bị lỗi hay ko, ngoài ra còn cho phép qui định số lượng gói tin được gửi trong một lần gửi (window-sizing), điều này đảm bảo máy nhận nhận được đầy đủ các gói tin mà máy gửi gửi đi, dẫn tới nó truyền dữ liệu chậm hơn UDP nhưng đáng tin cậy hơn UDP.
+
+UDP hoạt động theo hướng phi kết nối (connectionless), không yêu cầu thiết lập kết nối giữa 2 máy gửi và nhận, không có sự đảm bảo gói tin khi truyền đi cũng như không thông báo về việc mất gói tin, không kiểm tra lỗi của gói tin, dẫn tới nó truyền dữ liệu nhanh hơn TCP do cơ chế hoạt động có phần đơn giản hơn, tuy nhiên lại ko đáng tin cậy bằng TCP.
+
+TCP thường sử dụng cho các ứng mạng cần độ chính xác và tin cậy cao như mail, FTP,... Còn UDP thích hợp cho các dịch vụ hỗ trợ về mặt tốc độ nhanh như VoIP, truyền hình trực tiếp, game online,...
