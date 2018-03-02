@@ -12,9 +12,9 @@
 ### / 2.3. Xây dựng mô hình DNS master-slave
 
 ## 3. Dịch vụ MySQL, PHP
-### / 3.1. Cài đặt, cấu hình MySQL
+### 3.1. Cài đặt, cấu hình MySQL
 ### / 3.2. Cài đặt, câu hình PHP
-### / 3.3. Các câu lệnh T-SQL
+### 3.3. Các câu lệnh T-SQL
 ### / 3.4. Cấu hình MySQL Replication
 
 ## 4. Dựng website sử dụng Wordpress
