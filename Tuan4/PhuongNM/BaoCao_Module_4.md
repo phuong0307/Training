@@ -5,16 +5,18 @@
 ### 1.1. Cài đặt, cấu hình Apache
 ### 1.2. Cài đặt, cấu hình nginx
 ### 1.3. Các module cơ bản trong Apache, nginx
+#### 1.3.1. Các module cơ bản trong Apache
+#### / 1.3.2. Các module cơ bản trong nginx
 
 ## 2. Dịch vụ DNS
 ### 2.1. DNS là gì?
 ### 2.2. Triển khai DNS sử dụng Bind
-### / 2.3. Xây dựng mô hình DNS master-slave
+### 2.3. Xây dựng mô hình DNS master-slave
 
 ## 3. Dịch vụ MySQL, PHP
-### / 3.1. Cài đặt, cấu hình MySQL
-### / 3.2. Cài đặt, câu hình PHP
-### / 3.3. Các câu lệnh T-SQL
+### 3.1. Cài đặt, / cấu hình MySQL
+### 3.2. Cài đặt, / cấu hình PHP
+### 3.3. Các câu lệnh T-SQL
 ### / 3.4. Cấu hình MySQL Replication
 
 ## 4. Dựng website sử dụng Wordpress
@@ -268,12 +270,14 @@ Cài đặt: `sudo apt-get install bind9`
 
 `sudo gedit /etc/bin/named.conf.options`
 
-Thêm `forwarders` (dùng để trỏ DNS Server ra bên ngoài để phân giải tên miền):
+Thêm `forwarders`:
 
 `	forwarders {
 		8.8.8.8;
 		8.8.4.4;
 	}	`
+
+Để các máy client có thể phân giải được một số tên miền hoặc địa chỉ IP không có trong DNS Server ta cần forward lời đề nghị đó đến một DNS Server khác, VD ta chọn DNS Server của Google.
 
 * *Cấu hình file named.conf.local:*
 
@@ -317,8 +321,60 @@ File của zone thuận là `/etc/bin/db.forward.com`, file của zone nghịch 
 
 ![](https://i.imgur.com/tSECgec.png)
 
-## / 2.3. Xây dựng mô hình DNS master-slave
+## 2.3. Xây dựng mô hình DNS master-slave
 
+Mục đích của việc xây dựng Slave DNS chính là thực hiện nhiệm vụ sao lưu dự phòng cho Master DNS. Vì khi Master DNS có sự cố thì việc phân giải tên miền sẽ không thể phân giải được. Slave DNS sẽ giải quyết vấn đề đó khi Master DNS không thể hoạt động vì một lý do nào đó.
+
+### 2.3.1. Máy Master
+
+Cấu hình như mục 2.2, tuy nhiên có vài điểm khác biệt.
+ * 192.168.10.2 - goodday.com
+ * 192.168.10.3 - dns1.goodday.com (địa chỉ của máy Master)
+ * 192.168.10.4 - dns2.goodday.com (địa chỉ của máy Slave)
+
+Các bước tiến hành như sau:
+ 
+* Sửa file `name.conf.local`. Ta thêm một số dòng vào zone thuận, cho phép tự động cập nhật trên đường mạng 192.168.10.0/24 và transfer sang máy Slave DNS 192.168.10.4. Ở đây chúng ta đang cấu hình trên máy Master DNS nên type là master.
+
+![](https://i.imgur.com/PeLSSOY.png)
+
+* Thêm địa chỉ của máy Slave vào file `db.forward.com`
+
+![](https://i.imgur.com/YJQEzyx.png)
+
+* Thêm địa chỉ của máy Slave file `db.reverse.com`
+
+![](https://i.imgur.com/I4aZvYh.png)
+
+* Khởi động lại dịch vụ bind: `sudo /etc/init.d/bind9 restart`
+
+* Dùng lệnh `dig` để kiểm tra
+
+![](https://i.imgur.com/D0tWaQH.png)
+
+### 2.3.2. Máy Slave
+
+* Thiết lập IP tĩnh cho máy: 
+
+`sudo ifconfig enp0s3 192.168.10.4 netmask 255.255.255.0`
+
+`sudo route add default gw 192.168.10.1`
+
+* Sửa file `/etc/resolv.conf`
+
+` nameserver 192.68.10.2`
+
+` search goodday.com`
+
+* Thêm tham số allow-transfer và masters vào trong file `/etc/bind/named.conf.local`, type là slave
+
+![](https://i.imgur.com/5TrupkE.png)
+
+* Khởi động lại dịch vụ bind: `sudo /etc/init.d/bind9 restart`
+
+* Dùng lệnh `dig` để kiểm tra
+
+![](https://i.imgur.com/RjAIQu1.png)
 
 ## 3. Dịch vụ MySQL, PHP
 ### 3.1. Cài đặt, cấu hình MySQL
