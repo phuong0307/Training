@@ -12,9 +12,9 @@
 ### / 2.3. Xây dựng mô hình DNS master-slave
 
 ## 3. Dịch vụ MySQL, PHP
-### 3.1. Cài đặt, cấu hình MySQL
+### / 3.1. Cài đặt, cấu hình MySQL
 ### / 3.2. Cài đặt, câu hình PHP
-### 3.3. Các câu lệnh T-SQL
+### / 3.3. Các câu lệnh T-SQL
 ### / 3.4. Cấu hình MySQL Replication
 
 ## 4. Dựng website sử dụng Wordpress
@@ -212,18 +212,110 @@ Hệ thống tên miền giúp cho nó có thể chỉ định tên miền cho c
 * Info: dùng cho việc phục vụ thông tin
 * Arpa: tên miền ngược
 * Mil: dành cho các tổ chức quân sự, quốc phòng
-* Mã các nước trên thế giới tham gia vào mạng internet, các quốc gia này được qui định bằng hai chữ cái theo tiêu chuẩn ISO-3166. (Ví dụ: Việt Nam là .vn, Singapo là sg, Anh là uk,…)
+* Mã các nước trên thế giới tham gia vào mạng internet, các quốc gia này được qui định bằng hai chữ cái theo tiêu chuẩn ISO-3166. (Ví dụ: Việt Nam là .vn, Singapore là sg, Anh là uk,…)
 
 DNS Server
 * Là một máy tính có nhiệm vụ là DNS Server, chạy dịch vụ DNS.
 * DNS Server là một cơ sở dữ liệu chứa các thông tin về vị trí của các DNS domain và phân giải các truy vấn xuất phát từ các Client.
 * DNS Server có thể cung cấp các thông tin do Client yêu cầu, và chuyển đến một DNS Server khác để nhờ phân giải hộ trong trường hợp nó không thể trả lời được các truy vấn về những tên miền không thuộc quyền quản lý và cũng luôn sẵn sàng trả lời các máy chủ khác về các tên miền mà nó quản lý. DNS Server lưu thông tin của Zone, truy vấn và trả kết quả cho DNS Client.
 
+**Các kiểu tên miền**
+
+Một tên miền được chia ra thành nhiều cấp bậc:
+
+* gTLD (Generic Top Level Domain) – tên miền kết thúc bằng .com, .net, .org, .gov, .edu và .name.
+* ccTLD (Country Code Top Level Domain) – tên miền riêng của mỗi quốc gia (ví dụ .il, .ru, .uk, ,us, .cn, .vn).
+* Infrastructure TLD – Xử lý và điều hướng chuyển đổi từ địa chỉ IP sang tên miền, Ví dụ IPv4 48.199.81.in-addr.arpa. Sử dụng trong bản ghi PTR (được giải thích bên dưới).
+* Cấp 2ld, 3ld, 4ld – Ví dụ www.somedomain.co.uk, uk là ccTLD, co là 2ld, somedomain là 3ld và www là 4ld.
+
+**Cách thức hoạt động của DNS Server**
+
+![](http://cloudvpsgiare.com/wp-content/uploads/2015/07/dnswhite.png)
+
+VD. Bạn muốn truy cập `google.com` trên trình duyệt web.
+
+Nếu hệ điều hành hoặc trình duyệt web của bạn không tìm được địa chỉ IP trong bộ nhớ đệm, nó sẽ gửi câu truy vấn đến Resolver Server (ISP của bạn).
+
+Resolver Server sẽ tìm trong bộ nhớ đệm của nó xem có địa chỉ IP bạn cần hay không. Nếu không thấy, nó sẽ gửi câu truy vấn đến cấp tiếp theo, Root Server.
+
+Root Server là phân cấp cao nhất trong DNS. Root Server không biết địa chỉ IP là gì, nhưng nó biết nơi mà Resolver có thể đến để tìm địa chỉ IP. Nó chỉ Resolver đến TLD Server (Top-Level Domain Server), nơi quản lý tên miền ".com".
+
+Resolver sẽ hỏi TLD Server: "Địa chỉ IP của `google.com` là gì?". TLD Server sẽ không biết IP của `google.com` là gì. Nó sẽ chỉ Resolver tới Name Server.
+
+Giờ Resolver sẽ hỏi Name Server. Name Server chịu trách nhiệm về tên miền, bao gồm IP. Khi nhận được câu truy vấn, Name Server sẽ trả về cho Resolver địa chỉ IP của `google.com`.
+
+Resolver sẽ nói cho máy tính của bạn biết điều đó, giờ bạn có thể truy cập trang web.
+
 ## 2.2. Triển khai DNS sử dụng Bind
 
 Cài đặt: `sudo apt-get install bind9`
 
-Cấu hình:
+**Cấu hình**:
+
+* *Thiết lập IP tĩnh cho máy:*
+
+(VD. IP tĩnh cho máy là `192.168.10.2`)
+
+`sudo ifconfig enp0s3 192.168.10.2 netmask 255.255.255.0`
+
+`sudo route add default gw 192.168.10.1`
+
+* *Khởi động lại dịch vụ mạng*:
+
+`sudo /etc/init.d/network restart`
+
+* *Cấu hình file named.conf.options:*
+
+`sudo gedit /etc/bin/named.conf.options`
+
+Thêm `forwarders` (dùng để trỏ DNS Server ra bên ngoài để phân giải tên miền):
+
+`	forwarders {
+		8.8.8.8;
+		8.8.4.4;
+	}	`
+
+* *Cấu hình file named.conf.local:*
+
+`sudo gedit /etc/bin/named.conf.local`
+
+Thêm zone phân giải thuận (tên miền => địa chỉ) và zone phân giải nghịch (địa chỉ => tên miền):
+
+(VD tên miền là `goodday.com`)
+
+![](https://i.imgur.com/q7yDKtF.png)
+
+File của zone thuận là `/etc/bin/db.forward.com`, file của zone nghịch là `/etc/bin/db.reverse.com`.
+
+* *Tạo file `db.forward.com` bằng cách copy file `db.local` từ `/etc/bind/`, chỉnh sửa hostname, thêm các tên miền mới và địa chỉ*
+
+![](https://i.imgur.com/hNa5RkW.png)
+
+* *Tạo file `db.reserve.com` bằng cách copy file `db.127` từ `/etc/bind/`, chỉnh sửa hostname, thêm các tên miền mới và địa chỉ*
+
+![](https://i.imgur.com/KAudkJn.png)
+
+* *Sửa file `/etc/resolv.conf`*
+
+` nameserver 192.68.10.2`
+
+` search goodday.com`
+
+* *Khởi động lại bind*: `sudo /etc/init.d/bind restart`
+
+* *Dùng lệnh `nslookup` để kiểm tra hoạt động của DNS*
+
+![](https://i.imgur.com/2DnsOvS.png)
+
+* *Cấu hình IP tĩnh cho máy Client và nhập địa chỉ của DNS Server*
+
+![](https://i.imgur.com/hlh5nfP.png)
+
+![](https://i.imgur.com/D02TORx.png)
+
+* *Trên máy Client, dùng lệnh `nslookup` để kiểm tra hoạt động của DNS*
+
+![](https://i.imgur.com/tSECgec.png)
 
 ## / 2.3. Xây dựng mô hình DNS master-slave
 
